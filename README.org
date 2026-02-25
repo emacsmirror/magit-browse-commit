@@ -1,1 +1,34 @@
 * magit-browse-commit
+
+Open the pull request or merge request in the =magit-blame= lines. Inspired by https://techlife.cookpad.com/entry/2015/11/17/151426.
+
+** Install
+#+begin_src emacs-lisp
+(use-package magit-browse-commit
+  :config
+  (setq magit-browse-commit-gitlab-host "your private gitlab host"))
+#+end_src
+
+** Usage
+
+Run =M-x magit-browse-commit-at-point= at =magit-blame= lines.
+
+
+Or bind it to the key =M-o=:
+#+begin_src emacs-lisp
+(with-eval-after-load 'magit-blame
+  (define-key magit-blame-mode-map (kbd "M-o") #'magit-browse-commit-at-point))
+#+end_src
+
+
+If you are using doomemacs, we can add key bindings to the `magit-blame-mode-hook`.
+#+begin_src emacs-lisp
+(after! magit
+  (defun +my/magit-blame-bindings ()
+    "Add custom bindings when magit-blame-mode is active."
+    (local-set-key (kbd "M-o") #'magit-browse-commit-at-point))
+  (add-hook 'magit-blame-mode-hook #'+my/magit-blame-bindings))
+#+end_src
+
+** Sceenshot
+[[./magit-browse-commit-screenshot.gif]]
