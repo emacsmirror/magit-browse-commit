@@ -77,9 +77,12 @@ COMMIT and the default branch."
 
 (defun magit-browse-commit--parse-mr-number (commit)
   "Extract GitLab merge request number from merge COMMIT message."
-  (let ((msg (magit-rev-format "%B" commit)))
-    (when (string-match "See merge request.*!\\([0-9]+\\)" msg)
-      (match-string 1 msg))))
+  (let ((msg (shell-command-to-string (format "git --no-pager log -1 --format=%%B %s" commit))))
+    (cond
+     ((string-match "See merge request.*!\\([0-9]+\\)" msg)
+      (match-string 1 msg))
+     ((string-match "Iid: \\([0-9]+\\)" msg)
+      (match-string 1 msg)))))
 
 (defun magit-browse-commit--parse-github-repo (remote-url)
   "Extract GitHub repository name from REMOTE-URL."
@@ -105,8 +108,6 @@ Finds the merge commit that introduced the blamed commit and opens
 the corresponding GitHub pull request or GitLab merge request in
 your browser."
   (interactive)
-  (unless (derived-mode-p 'magit-blame-mode)
-    (user-error "Not in magit-blame-mode"))
   (let ((chunk (magit-current-blame-chunk)))
     (unless chunk
       (user-error "No blame chunk at point"))
@@ -140,7 +141,7 @@ your browser."
                 (user-error "Could not parse GitLab repository from URL: %s" remote-url))
               (unless mr-num
                 (user-error "Could not find merge request number in merge commit: %s" merge-commit))
-              (let ((url (format "https://%s/%s/-/merge_requests/%s"
+              (let ((url (format "https://%s/%s/merge_requests/%s"
                                  magit-browse-commit-gitlab-host
                                  repo-name
                                  mr-num)))
