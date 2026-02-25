@@ -1,14 +1,14 @@
 * magit-browse-commit
 
-Open the pull request in the **magit-blame** lines. Inspired by https://techlife.cookpad.com/entry/2015/11/17/151426
+Open the pull request in the =magit-blame= lines. Inspired by https://techlife.cookpad.com/entry/2015/11/17/151426
 
 
 ** Usage
 
-Run **M-x magit-browse-commit-at-point** at **magit-blame** lines.
+Run =M-x magit-browse-commit-at-point= at =magit-blame= lines.
 
 
-Or bind it to the key **M-o**:
+Or bind it to the key =M-o=:
 #+begin_src emacs-lisp
 (with-eval-after-load 'magit-blame
   (define-key magit-blame-mode-map (kbd "M-o") #'magit-browse-commit-at-point))
