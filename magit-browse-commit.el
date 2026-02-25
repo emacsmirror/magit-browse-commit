@@ -58,6 +58,14 @@
   :type 'string
   :group 'magit-browse-commit)
 
+(defun magit-browse-commit-remote-default-head (default)
+  "Find the default head in remote, like if it's main or master(DEFAULT)."
+  (when-let ((output (magit-git-string "ls-remote" "--symref" "origin" "HEAD")))
+    (cond
+     ((string-match "ref: refs/heads/\\([^ ]+\\)\\s-+HEAD" output)
+      (match-string 1 output))
+     (t default))))
+
 (defun magit-browse-commit--parse-merge-commit (commit)
   "Find the merge commit that introduced COMMIT.
 Uses git ancestry-path to find the first merge commit between
@@ -67,7 +75,8 @@ COMMIT and the default branch."
      (shell-command-to-string
       (format "git log --merges --oneline --reverse --ancestry-path %s...%s | head -n 1 | cut -f1 -d' '"
               (shell-quote-argument commit)
-              (shell-quote-argument magit-browse-commit-default-branch))))))
+              (shell-quote-argument (magit-browse-commit-remote-default-head
+                                     magit-browse-commit-default-branch)))))))
 
 (defun magit-browse-commit--parse-pr-number (commit)
   "Extract GitHub pull request number from merge COMMIT message."
