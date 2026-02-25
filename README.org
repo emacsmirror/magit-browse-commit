@@ -31,4 +31,4 @@ If you are using doomemacs, we can add key bindings to the `magit-blame-mode-hoo
 #+end_src
 
 ** Sceenshot
-[[./magit-browse-commit-screenshot.gif]]
+[[./magit-browse-commit-screenshot.mp4]]
