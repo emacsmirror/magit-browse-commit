@@ -1,12 +1,12 @@
 ;;; magit-browse-commit.el --- Browse pull/merge requests from magit-blame -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2025 Angeldswang
+;; Copyright (C) 2025 bbw9n
 
-;; Author: Angeldswang <angeldswang@gmail.com>
+;; Author: Angeldswang <bbw9nio@gmail.com>
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "25.1") (magit "3.0.0") (s "1.12.0"))
 ;; Keywords: vc, tools, git
-;; URL: https://github.com/angeldswang/magit-browse-commit
+;; URL: https://github.com/bbw9n/magit-browse-commit
 
 ;; This file is not part of GNU Emacs.
 
