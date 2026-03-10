@@ -4,7 +4,7 @@
 
 ;; Author: Angeldswang <bbw9nio@gmail.com>
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "25.1") (magit "3.0.0") (s "1.12.0"))
+;; Package-Requires: ((emacs "25.1") (magit "3.0.0"))
 ;; Keywords: vc, tools, git
 ;; URL: https://github.com/bbw9n/magit-browse-commit
 
@@ -41,7 +41,6 @@
 
 (require 'magit)
 (require 'magit-blame)
-(require 's)
 
 (defgroup magit-browse-commit nil
   "Browse pull/merge requests from magit-blame."
@@ -58,25 +57,32 @@
   :type 'string
   :group 'magit-browse-commit)
 
+(defvar magit-browse-commit--default-branch-cache nil
+  "Alist of (toplevel . branch) for caching default branch per repo.")
+
 (defun magit-browse-commit-remote-default-head (default)
-  "Find the default head in remote, like if it's main or master(DEFAULT)."
-  (when-let ((output (magit-git-string "ls-remote" "--symref" "origin" "HEAD")))
-    (cond
-     ((string-match "ref: refs/heads/\\([^ ]+\\)\\s-+HEAD" output)
-      (match-string 1 output))
-     (t default))))
+  "Find the default head in remote, like if it's main or master(DEFAULT).
+Caches the result per repository to avoid repeated network calls."
+  (let* ((toplevel (magit-toplevel))
+         (cached (assoc toplevel magit-browse-commit--default-branch-cache)))
+    (if cached
+        (cdr cached)
+      (let ((branch (or (when-let ((output (magit-git-string "ls-remote" "--symref" "origin" "HEAD")))
+                          (when (string-match "ref: refs/heads/\\([^ ]+\\)\\s-+HEAD" output)
+                            (match-string 1 output)))
+                        default)))
+        (push (cons toplevel branch) magit-browse-commit--default-branch-cache)
+        branch))))
 
 (defun magit-browse-commit--parse-merge-commit (commit)
   "Find the merge commit that introduced COMMIT.
-Uses git ancestry-path to find the first merge commit between
-COMMIT and the default branch."
-  (let ((default-directory (magit-toplevel)))
-    (s-trim
-     (shell-command-to-string
-      (format "git log --merges --oneline --reverse --ancestry-path %s...%s | head -n 1 | cut -f1 -d' '"
-              (shell-quote-argument commit)
-              (shell-quote-argument (magit-browse-commit-remote-default-head
-                                     magit-browse-commit-default-branch)))))))
+Uses git rev-list with ancestry-path to find the earliest merge commit
+between COMMIT and the default branch."
+  (let* ((default-branch (magit-browse-commit-remote-default-head
+                          magit-browse-commit-default-branch))
+         (lines (magit-git-lines "rev-list" "--merges" "--ancestry-path"
+                                 (format "%s..%s" commit default-branch))))
+    (if lines (car (last lines)) "")))
 
 (defun magit-browse-commit--parse-pr-number (commit)
   "Extract GitHub pull request number from merge COMMIT message."
@@ -86,7 +92,7 @@ COMMIT and the default branch."
 
 (defun magit-browse-commit--parse-mr-number (commit)
   "Extract GitLab merge request number from merge COMMIT message."
-  (let ((msg (shell-command-to-string (format "git --no-pager log -1 --format=%%B %s" commit))))
+  (let ((msg (magit-rev-format "%B" commit)))
     (cond
      ((string-match "See merge request.*!\\([0-9]+\\)" msg)
       (match-string 1 msg))

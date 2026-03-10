@@ -1,0 +1,33 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        emacs: ['27.1', '29.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs }}
+      - uses: leotaku/elisp-check@master
+        with:
+          check: melpa
+          file: magit-browse-commit.el
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        emacs: ['27.1', '29.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: purcell/setup-emacs@master
+        with:
+          version: ${{ matrix.emacs }}
+      - uses: leotaku/elisp-check@master
+        with:
+          check: ert
+          file: magit-browse-commit-test.el
