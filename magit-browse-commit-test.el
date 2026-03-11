@@ -103,22 +103,22 @@
 
 (ert-deftest magit-browse-commit-test-parse-mr-number-see-merge-request ()
   "Extract MR number from 'See merge request' format."
-  (cl-letf (((symbol-function 'magit-rev-format)
-             (lambda (_fmt _commit)
+  (cl-letf (((symbol-function 'shell-command-to-string)
+             (lambda (_cmd)
                "Merge branch 'feature' into 'main'\n\nSee merge request group/project!123")))
     (should (equal "123" (magit-browse-commit--parse-mr-number "abc123")))))
 
 (ert-deftest magit-browse-commit-test-parse-mr-number-iid ()
   "Extract MR number from 'Iid:' format."
-  (cl-letf (((symbol-function 'magit-rev-format)
-             (lambda (_fmt _commit)
+  (cl-letf (((symbol-function 'shell-command-to-string)
+             (lambda (_cmd)
                "Some merge commit\n\nIid: 456")))
     (should (equal "456" (magit-browse-commit--parse-mr-number "abc123")))))
 
 (ert-deftest magit-browse-commit-test-parse-mr-number-no-match ()
   "Return nil when commit message has no MR number."
-  (cl-letf (((symbol-function 'magit-rev-format)
-             (lambda (_fmt _commit)
+  (cl-letf (((symbol-function 'shell-command-to-string)
+             (lambda (_cmd)
                "Regular commit without MR info")))
     (should (null (magit-browse-commit--parse-mr-number "abc123")))))
 
