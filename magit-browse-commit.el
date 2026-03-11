@@ -92,7 +92,7 @@ between COMMIT and the default branch."
 
 (defun magit-browse-commit--parse-mr-number (commit)
   "Extract GitLab merge request number from merge COMMIT message."
-  (let ((msg (magit-rev-format "%B" commit)))
+  (let ((msg (shell-command-to-string (format "git --no-pager log -1 --format=%%B %s" commit))))
     (cond
      ((string-match "See merge request.*!\\([0-9]+\\)" msg)
       (match-string 1 msg))
